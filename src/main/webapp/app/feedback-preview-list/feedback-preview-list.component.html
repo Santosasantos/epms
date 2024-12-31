@@ -1,0 +1,119 @@
+<div class="container-fluid p-3">
+  <!-- Header Card -->
+  <p-card styleClass="mb-3">
+    <div class="flex flex-column sm:flex-row justify-content-between align-items-center mb-3">
+      <h2 class="text-2xl font-bold text-gray-800 mb-2 sm:mb-0">Feedback Requests</h2>
+      <button pButton icon="pi pi-refresh"
+              class="p-button-rounded p-button-text"
+              (click)="refreshList()"
+              [disabled]="isLoading">
+      </button>
+    </div>
+
+    @if (error) {
+      <div class="p-3 mb-3 bg-red-100 text-red-700 border-round">
+        <i class="pi pi-exclamation-circle mr-2"></i>
+        {{ error }}
+      </div>
+    }
+  </p-card>
+
+  <!-- Content Card -->
+  <p-card>
+    @if (isLoading) {
+      <div class="flex justify-content-center align-items-center min-h-screen">
+        <p-progressSpinner></p-progressSpinner>
+      </div>
+    } @else if (feedbackList.length === 0) {
+      <div class="text-center py-6">
+        <i class="pi pi-inbox text-4xl text-gray-400 mb-3"></i>
+        <p class="text-gray-500">No feedback requests available</p>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <p-table [value]="feedbackList"
+                 [paginator]="true"
+                 [rows]="10"
+                 [showCurrentPageReport]="true"
+                 [responsive]="true"
+                 responsiveLayout="stack"
+                 [breakpoint]="'960px'"
+                 styleClass="p-datatable-sm p-datatable-striped">
+
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Requester</th>
+              <th class="hidden sm:table-cell">Designation</th>
+              <th class="hidden md:table-cell">Category</th>
+              <th class="hidden sm:table-cell">Status</th>
+              <th class="hidden lg:table-cell">Date</th>
+              <th>Action</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-feedback>
+            <tr>
+              <td>
+                <span class="p-column-title">Requester</span>
+                <div class="flex align-items-center">
+                  <i class="pi pi-user mr-2 text-gray-500"></i>
+                  <div class="flex flex-column">
+                    <span>{{feedback.requester?.firstname}} {{feedback.requester?.lastname}}</span>
+                    <small class="sm:hidden text-gray-500">
+                      {{feedback.requester?.designation}}
+                    </small>
+                  </div>
+                </div>
+              </td>
+
+              <td class="hidden sm:table-cell">
+                <span class="p-column-title">Designation</span>
+                {{feedback.requester?.designation || 'N/A'}}
+              </td>
+
+              <td class="hidden md:table-cell">
+                <span class="p-column-title">Category</span>
+                <p-chip [label]="getCategoryLabel(feedback.id)"></p-chip>
+              </td>
+
+              <td class="hidden sm:table-cell">
+                <span class="p-column-title">Status</span>
+                <span [class]="'font-semibold ' + getStatusColor(getResponderStatus(feedback.id))">
+                  {{getResponderStatus(feedback.id)}}
+                </span>
+              </td>
+
+              <td class="hidden lg:table-cell">
+                <span class="p-column-title">Date</span>
+                {{getFormattedDate(feedback.createdDate)}}
+              </td>
+
+              <td>
+                <span class="p-column-title">Action</span>
+                <button pButton
+                        type="button"
+                        label="Provide Feedback"
+                        icon="pi pi-check-circle"
+                        class="p-button-sm w-full sm:w-auto"
+                        [disabled]="!canProvideFeedback(feedback.id)"
+                        (click)="provideFeedback(getResponderId(feedback.id))">
+                </button>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="6" class="text-center p-4">
+                <div class="text-gray-500">
+                  <i class="pi pi-info-circle mr-2"></i>
+                  No records found
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    }
+  </p-card>
+</div>

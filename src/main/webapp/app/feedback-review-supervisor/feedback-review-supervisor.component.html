@@ -1,0 +1,168 @@
+<div class="container-fluid py-5">
+  <h2 class="text-3xl font-bold mb-6 text-center text-primary">Feedback Review</h2>
+
+  <div *ngIf="loading" class="d-flex justify-content-center align-items-center" style="height: 200px;">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger" role="alert">
+    <strong>Error!</strong> {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error" class="row">
+    <!-- Selected Responders -->
+    <div class="col-12 mb-5">
+      <h3 class="text-2xl font-semibold mb-4 text-secondary">Selected Responders</h3>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+          <tr>
+            <th>Name [Pin]</th>
+            <th>Category</th>
+            <th>Designation</th>
+            <th>Functional Designation</th>
+            <th>Project</th>
+            <th class="text-center">Action</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let responder of selectedresponders" class="align-middle">
+            <td>
+              <ng-container *ngIf="responder.category === ResponderCategory.STAKEHOLDER; else employeeName">
+                {{ responder.stakeholderEmail }}
+              </ng-container>
+              <ng-template #employeeName>
+                {{ responder.employee?.firstname }} {{ responder.employee?.lastname }} [{{ responder.employee?.pin }}]
+              </ng-template>
+            </td>
+            <td>{{ responder.category }}</td>
+            <td>{{ responder.category !== ResponderCategory.STAKEHOLDER ? responder.employee?.designation : '' }}</td>
+            <td>{{ responder.category !== ResponderCategory.STAKEHOLDER ? responder.employee?.functionalDesignation : '' }}</td>
+            <td>{{ responder.category !== ResponderCategory.STAKEHOLDER ? responder.employee?.project : '' }}</td>
+            <td class="text-center">
+              <button *ngIf="responder.category !== ResponderCategory.SELF && responder.category !== ResponderCategory.SUPERVISOR"
+                      (click)="replaceResponder(responder)"
+                      class="btn btn-primary btn-sm">
+                Replace
+              </button>
+              <span *ngIf="responder.category === ResponderCategory.SELF || responder.category === ResponderCategory.SUPERVISOR"
+                    class="text-muted">No Action Available</span>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Feedback Questions -->
+    <div class="col-12 mb-5">
+      <h3 class="text-2xl font-semibold mb-4 text-secondary">Feedback Questions</h3>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+          <tr>
+            <th>SL No</th>
+            <th>Question</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let question of feedbackquestions; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ question.feedbackdescription }}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Extra Questions -->
+    <div class="col-12 mb-5">
+      <h3 class="text-2xl font-semibold mb-4 text-secondary">Extra Questions</h3>
+      <div *ngIf="extraquestions.length > 0" class="table-responsive mb-4">
+        <table class="table table-hover">
+          <thead class="table-light">
+          <tr>
+            <th>SL No</th>
+            <th>Question</th>
+            <th class="text-center">Action</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let extraquestion of extraquestions; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ extraquestion.question }}</td>
+            <td class="text-center">
+              <button (click)="removeExtraQuestion(extraquestion.id)" class="btn btn-danger btn-sm">
+                Remove
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p *ngIf="extraquestions.length === 0" class="text-muted mb-4">No Extra Questions</p>
+
+      <button *ngIf="!showExtraQuestionForm" (click)="addExtraQuestion()" class="btn btn-success">
+        Add Extra Question
+      </button>
+
+      <form *ngIf="showExtraQuestionForm" [formGroup]="extraQuestionForm" (ngSubmit)="saveExtraQuestion()" class="card p-4 mt-4">
+        <div class="mb-3">
+          <label for="question" class="form-label">Question:</label>
+          <input id="question" type="text" class="form-control" formControlName="question" required>
+        </div>
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-secondary" (click)="cancelAddExtraQuestion()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="!extraQuestionForm.valid">
+            Save
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="col-12 d-flex justify-content-end gap-3">
+      <button (click)="approveStatus()" class="btn btn-success">Approve</button>
+      <button (click)="rejectStatus()" class="btn btn-danger">Reject</button>
+    </div>
+  </div>
+</div>
+
+<!-- Replace Responder Dialog -->
+<p-dialog [(visible)]="showReplaceDialog" [modal]="true" [style]="{width: '90vw', maxWidth: '500px'}" [header]="'Replace ' + (replacementType === 'STAKEHOLDER' ? 'Stakeholder' : 'Employee') + ' Responder'">
+  <div class="p-4">
+    <div *ngIf="replacementType === 'STAKEHOLDER'" class="mb-3">
+      <label for="replacementEmail" class="form-label">New Stakeholder Email</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+        <input id="replacementEmail" type="email" class="form-control" [(ngModel)]="replacementEmail" placeholder="Enter stakeholder's email address">
+      </div>
+    </div>
+
+    <div *ngIf="replacementType !== 'STAKEHOLDER'" class="mb-3">
+      <label for="selectedReplacement" class="form-label">Select Replacement Employee</label>
+      <select id="selectedReplacement" [(ngModel)]="selectedReplacement" class="form-select">
+        <option [ngValue]="null" disabled selected>Choose a replacement employee</option>
+        <option *ngFor="let employee of replacementOptions" [ngValue]="employee.id">
+          {{employee.firstname}} {{employee.lastname}} [{{employee.pin}}] - {{employee.designation}}
+        </option>
+      </select>
+    </div>
+
+    <div *ngIf="replacementError" class="alert alert-danger d-flex align-items-center" role="alert">
+      <i class="fas fa-exclamation-circle me-2"></i>
+      <div>{{replacementError}}</div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="closeReplaceDialog()"></button>
+    <button pButton label="Confirm Replacement" icon="pi pi-check" class="p-button-primary"
+            (click)="confirmReplacement()"
+            [disabled]="replacementType === 'STAKEHOLDER' ? !replacementEmail : !selectedReplacement"></button>
+  </ng-template>
+</p-dialog>

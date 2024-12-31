@@ -1,0 +1,97 @@
+<div class="container-fluid py-4 bg-light">
+  <h2 class="text-center mb-4">Supervisee List and Feedback Status</h2>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center" style="height: 200px;">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && isMapEmpty" class="text-center py-5 bg-white rounded shadow">
+    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+    <p class="lead text-muted">No supervisees found.</p>
+  </div>
+
+  <!-- Supervisee List -->
+  <div *ngIf="!isLoading && !isMapEmpty" class="card shadow">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+          <tr>
+            <th scope="col">
+              <i class="fas fa-user text-muted me-2"></i>Supervisee Name [PIN]
+            </th>
+            <th scope="col">
+              <i class="fas fa-briefcase text-muted me-2"></i>Designation
+            </th>
+            <th scope="col">
+              <i class="fas fa-sitemap text-muted me-2"></i>Functional Designation
+            </th>
+            <th scope="col">
+              <i class="fas fa-chart-line text-muted me-2"></i>Feedback Status
+            </th>
+            <th scope="col" class="text-center">Action</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let entry of superviseeMap | keyvalue">
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mr-2" style="width: 40px; height: 40px;">
+                  <img [src]="'data:' + entry.key.profileContentType + ';base64,' + entry.key.profile"
+                       (click)="openFile(entry.key.profile!, entry.key.profileContentType)"
+                       alt="Employee Profile"
+                       class="img-fluid rounded-circle"
+                       style="width: 32px; height: 32px; object-fit: cover;">
+                </div>
+                <div>
+                  <div>{{ entry.key.firstname }} {{ entry.key.lastname }}</div>
+                  <small class="text-muted">[{{ entry.key.pin }}]</small>
+                </div>
+              </div>
+            </td>
+            <td>{{ entry.key.designation }}</td>
+            <td>{{ entry.key.functionalDesignation }}</td>
+            <td>
+                <span class="badge"
+                      [ngClass]="{
+                        'bg-success': getFeedbackStatus(entry.value) === FeedbackStatus.COMPLETED || getFeedbackStatus(entry.value) === FeedbackStatus.APPROVED,
+                        'bg-warning': getFeedbackStatus(entry.value) === FeedbackStatus.NEW || getFeedbackStatus(entry.value) === FeedbackStatus.PENDING_FOR_ASSESSMENT || getFeedbackStatus(entry.value) === FeedbackStatus.SENT_TO_SUPERVISOR,
+                        'bg-danger': getFeedbackStatus(entry.value) === 'No feedback' || getFeedbackStatus(entry.value) === FeedbackStatus.REJECTED
+                      }">
+                  <i class="fas me-1"
+                     [ngClass]="{
+                       'fa-check-circle': getFeedbackStatus(entry.value) === FeedbackStatus.COMPLETED || getFeedbackStatus(entry.value) === FeedbackStatus.APPROVED,
+                       'fa-clock': getFeedbackStatus(entry.value) === FeedbackStatus.NEW || getFeedbackStatus(entry.value) === FeedbackStatus.PENDING_FOR_ASSESSMENT || getFeedbackStatus(entry.value) === FeedbackStatus.SENT_TO_SUPERVISOR,
+                       'fa-times-circle': getFeedbackStatus(entry.value) === 'No feedback' || getFeedbackStatus(entry.value) === FeedbackStatus.REJECTED
+                     }"></i>
+                  {{ getFeedbackStatus(entry.value) }}
+                </span>
+            </td>
+            <td class="text-center">
+              <button (click)="viewFeedback(entry.value)"
+                      class="btn btn-sm"
+                      [ngClass]="{
+                          'btn-primary': !isButtonDisabled(entry.value),
+                          'btn-secondary': isButtonDisabled(entry.value)
+                        }"
+                      [disabled]="isButtonDisabled(entry.value)">
+                <i class="fas fa-eye me-1"></i>
+                {{ isButtonDisabled(entry.value) ? 'No Action' : 'View Feedback' }}
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Review Component -->
+  <div *ngIf="selectedFeedbackId" class="mt-4">
+    <jhi-feedback-review-supervisor [feedbackId]="selectedFeedbackId!"></jhi-feedback-review-supervisor>
+  </div>
+</div>

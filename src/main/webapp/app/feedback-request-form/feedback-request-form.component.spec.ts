@@ -8,10 +8,9 @@ describe('FeedbackRequestFormComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FeedbackRequestFormComponent]
-    })
-    .compileComponents();
-    
+      imports: [FeedbackRequestFormComponent],
+    }).compileComponents();
+
     fixture = TestBed.createComponent(FeedbackRequestFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

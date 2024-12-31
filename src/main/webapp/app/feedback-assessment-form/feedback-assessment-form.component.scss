@@ -1,0 +1,119 @@
+.assessment-form {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.profile-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+}
+
+.profile-image:hover {
+  transform: scale(1.05);
+}
+
+.info-card {
+  background: linear-gradient(to right bottom, #ffffff, #f8f9fa);
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.assessment-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease;
+}
+
+.assessment-card:hover {
+  transform: translateY(-5px);
+}
+
+.rating-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.rating-item:hover {
+  background-color: rgba(0,0,0,0.02);
+}
+
+.competency-title {
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.feedback-item {
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 1.5rem;
+}
+
+.skill-selection-container {
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.selected-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Custom PrimeNG Styles */
+:host ::ng-deep {
+  .p-stepper .p-stepper-header {
+    justify-content: center;
+  }
+
+  .p-stepper-header .p-stepper-item {
+    flex: 0 1 auto;
+  }
+
+  .p-rating .p-rating-item {
+    font-size: 1.2rem;
+  }
+
+  .p-multiselect {
+    width: 100%;
+  }
+
+  .p-chip {
+    background-color: #e9ecef;
+    &:hover {
+      background-color: #dee2e6;
+    }
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .profile-image {
+    width: 80px;
+    height: 80px;
+  }
+
+  .feedback-item {
+    padding: 1rem;
+  }
+
+  .rating-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
